@@ -1,5 +1,7 @@
 # <img src="icons/icon48.png" width="28" align="top"> mnurl - Short URL Generator
 
+[English](README.md) | [中文](README_CN.md)
+
 A Chrome extension for quickly generating short URLs via [mnurl.com](https://mnurl.com).
 
 ## Features
