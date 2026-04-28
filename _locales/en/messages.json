@@ -1,0 +1,8 @@
+{
+  "extName": {
+    "message": "mnURL - Short URL Generator"
+  },
+  "extDescription": {
+    "message": "Quickly generate short URLs for the current page via mnurl.com. Supports English, Simplified & Traditional Chinese."
+  }
+}

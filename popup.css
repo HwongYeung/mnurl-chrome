@@ -44,6 +44,15 @@ body {
   font-weight: 700;
   color: #ffffff;
   letter-spacing: -0.3px;
+  cursor: pointer;
+  border-radius: 6px;
+  padding: 2px 6px;
+  margin: -2px -6px;
+  transition: background 0.2s;
+}
+
+.logo:hover {
+  background: rgba(255, 255, 255, 0.12);
 }
 
 .btn-header-action {
@@ -252,15 +261,19 @@ body {
 
 /* User Card */
 .user-card {
+  margin: 16px 20px 0;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.user-card-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin: 16px 20px 0;
   padding: 12px 14px;
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
 }
 
 .user-card-left {
@@ -320,6 +333,32 @@ body {
   color: #0d9488;
   text-transform: capitalize;
   white-space: nowrap;
+}
+
+.user-detail {
+  padding: 10px 14px;
+  background: #f8fafb;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.user-detail-row {
+  font-size: 12px;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.user-detail-row .upgrade-link {
+  color: #06b6d4;
+  font-weight: 500;
+  text-decoration: none;
+  margin-left: auto;
+  font-size: 11px;
+}
+.user-detail-row .upgrade-link:hover {
+  text-decoration: underline;
 }
 
 .settings-section {
@@ -737,9 +776,70 @@ body {
   text-decoration: underline;
 }
 
+/* ===== Language Selector ===== */
+.lang-section {
+  margin-top: 4px;
+}
+
+.lang-selector {
+  display: flex;
+  gap: 8px;
+}
+
+.lang-option {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+  outline: none;
+  color: #374151;
+}
+
+.lang-option:hover {
+  border-color: #06b6d4;
+  color: #0e7490;
+}
+
+.lang-option.active {
+  border-color: #06b6d4;
+  background: #f0fdfa;
+  color: #0e7490;
+  font-weight: 600;
+}
+
 /* ===== Utility ===== */
 .hidden {
   display: none !important;
+}
+
+/* ===== Back Bar ===== */
+.back-bar {
+  padding: 12px 20px 0;
+}
+.btn-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px 4px 4px;
+  border: none;
+  background: none;
+  color: #06b6d4;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+.btn-back:hover {
+  background: #f0fdfa;
+}
+.history-view > .back-bar {
+  padding: 12px 0 0;
 }
 
 /* ===== Animations ===== */

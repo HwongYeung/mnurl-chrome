@@ -1,0 +1,8 @@
+{
+  "extName": {
+    "message": "mnURL - 短网址生成器"
+  },
+  "extDescription": {
+    "message": "通过 mnurl.com 一键生成当前页面的短网址，支持中英双语。"
+  }
+}

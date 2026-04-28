@@ -11,6 +11,7 @@ A Chrome extension for quickly generating short URLs via [mnurl.com](https://mnu
 - **History** — Browse all your created short URLs with click counts and dates, paginated
 - **User Profile** — Displays your account name and plan after configuring API Key
 - **Settings** — Configure and update your API Key at any time
+- **Multi-Language** — Supports English, Simplified Chinese, and Traditional Chinese with in-app language switching
 
 ## Install
 
@@ -69,6 +70,11 @@ mnurl-chrome/
 ├── popup.html       # Popup UI
 ├── popup.css        # Styles
 ├── popup.js         # Core logic
+├── i18n.js          # Internationalization (runtime language switching)
+├── _locales/        # Chrome i18n manifest localization
+│   ├── en/messages.json
+│   ├── zh_CN/messages.json
+│   └── zh_TW/messages.json
 └── icons/           # Extension icons (16/32/48/128px)
 ```
 

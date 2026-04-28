@@ -16,16 +16,16 @@
             <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
-          <span>mnurl</span>
+          <span>mnURL</span>
         </div>
         <div class="header-actions">
-          <button class="btn-header-action" id="btnHistory" title="History">
+          <button class="btn-header-action" id="btnHistory" data-i18n-title="btn_history" title="History">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
               <polyline points="12,6 12,12 16,14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </button>
-          <button class="btn-header-action" id="btnSettings" title="Settings">
+          <button class="btn-header-action" id="btnSettings" data-i18n-title="btn_settings" title="Settings">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
               <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -33,28 +33,43 @@
           </button>
         </div>
       </div>
-      <div class="subtitle" id="headerSubtitle">Short URL Generator</div>
+      <div class="subtitle" id="headerSubtitle" data-i18n="subtitle">Short URL Generator</div>
     </div>
 
     <!-- ===== Settings View ===== -->
     <div class="settings-view hidden" id="settingsView">
+      <div class="back-bar">
+        <button class="btn-back" id="backBarSettings">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+            <path d="M19 12H5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M12 19l-7-7 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span data-i18n="btn_back">Back</span>
+        </button>
+      </div>
       <!-- User Profile Card -->
       <div class="user-card hidden" id="userCard">
-        <div class="user-card-left">
-          <div class="user-avatar" id="userAvatar">U</div>
-          <div class="user-info">
-            <div class="user-name" id="userName">--</div>
-            <div class="user-email" id="userEmail">--</div>
+        <div class="user-card-top">
+          <div class="user-card-left">
+            <div class="user-avatar" id="userAvatar">U</div>
+            <div class="user-info">
+              <div class="user-name" id="userName">--</div>
+              <div class="user-email" id="userEmail">--</div>
+            </div>
           </div>
+          <div class="user-plan-badge" id="userPlanBadge">--</div>
         </div>
-        <div class="user-plan-badge" id="userPlanBadge">--</div>
+        <div class="user-detail hidden" id="userDetail">
+          <div class="user-detail-row" id="userPlanExpiry"></div>
+          <div class="user-detail-row" id="userLinksLimit"></div>
+        </div>
       </div>
 
       <div class="settings-section">
-        <label class="label">API Key</label>
+        <label class="label" data-i18n="api_key_label">API Key</label>
         <div class="api-key-row">
-          <input type="password" class="api-key-input" id="apiKeyInput" placeholder="Enter your mnurl.com API Key" autocomplete="off" spellcheck="false">
-          <button class="btn-toggle-visibility" id="btnToggleKey" title="Show/Hide">
+          <input type="password" class="api-key-input" id="apiKeyInput" data-i18n-placeholder="api_key_placeholder" placeholder="Enter your mnurl.com API Key" autocomplete="off" spellcheck="false">
+          <button class="btn-toggle-visibility" id="btnToggleKey" data-i18n-title="btn_show_hide" title="Show/Hide">
             <svg class="icon-eye" id="iconEye" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
@@ -65,24 +80,44 @@
             </svg>
           </button>
         </div>
-        <div class="api-key-hint">
+        <div class="api-key-hint" data-i18n="api_key_hint">
           Get your API Key from <a href="https://mnurl.com/api-documentation" target="_blank">mnurl.com/api-documentation</a>
         </div>
         <button class="btn-save-key" id="btnSaveKey">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
-          <span>Save</span>
+          <span data-i18n="btn_save">Save</span>
         </button>
       </div>
+
+      <!-- Language Selector -->
+      <div class="settings-section lang-section">
+        <label class="label" data-i18n="language_label">Language</label>
+        <div class="lang-selector" id="langSelector">
+          <button class="lang-option" data-lang="zh-CN">简体中文</button>
+          <button class="lang-option" data-lang="zh-HK">繁體中文</button>
+          <button class="lang-option" data-lang="en">English</button>
+        </div>
+      </div>
+
       <div class="settings-msg hidden" id="settingsMsg"></div>
     </div>
 
     <!-- ===== History View ===== -->
     <div class="history-view hidden" id="historyView">
+      <div class="back-bar">
+        <button class="btn-back" id="backBarHistory">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+            <path d="M19 12H5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M12 19l-7-7 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span data-i18n="btn_back">Back</span>
+        </button>
+      </div>
       <div class="history-header-bar">
-        <label class="label" style="margin-top:0">History</label>
-        <button class="btn-refresh" id="btnRefresh" title="Refresh">
+        <label class="label" style="margin-top:0" data-i18n="history_label">History</label>
+        <button class="btn-refresh" id="btnRefresh" data-i18n-title="btn_refresh" title="Refresh">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <polyline points="23,4 23,10 17,10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -92,7 +127,7 @@
       <!-- Loading -->
       <div class="history-loading hidden" id="historyLoading">
         <div class="spinner"></div>
-        <span>Loading history...</span>
+        <span data-i18n="history_loading">Loading history...</span>
       </div>
       <!-- Empty state -->
       <div class="history-empty hidden" id="historyEmpty">
@@ -100,7 +135,7 @@
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="#d1d5db" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           <polyline points="14,2 14,8 20,8" stroke="#d1d5db" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-        <span>No short URLs created yet.</span>
+        <span data-i18n="history_empty">No short URLs created yet.</span>
       </div>
       <!-- Error -->
       <div class="history-error hidden" id="historyError">
@@ -120,14 +155,14 @@
             <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="#06b6d4" stroke-width="2" stroke-linecap="round"/>
           </svg>
         </div>
-        <div class="setup-title">API Key Required</div>
-        <div class="setup-desc">Please configure your mnurl.com API Key to start generating short URLs.</div>
+        <div class="setup-title" data-i18n="setup_title">API Key Required</div>
+        <div class="setup-desc" data-i18n="setup_desc">Please configure your mnurl.com API Key to start generating short URLs.</div>
         <button class="btn-go-settings" id="btnGoSettings">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
             <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
-          <span>Go to Settings</span>
+          <span data-i18n="btn_go_settings">Go to Settings</span>
         </button>
       </div>
 
@@ -135,8 +170,8 @@
       <div class="normal-content hidden" id="normalContent">
         <!-- Current URL display -->
         <div class="current-url-section">
-          <label class="label">Current Page</label>
-          <div class="current-url" id="currentUrl" title="">Loading...</div>
+          <label class="label" data-i18n="current_page">Current Page</label>
+          <div class="current-url" id="currentUrl" title="" data-i18n="loading">Loading...</div>
         </div>
 
         <!-- Generate button -->
@@ -144,21 +179,21 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
-          <span>Generate Short URL</span>
+          <span data-i18n="btn_generate">Generate Short URL</span>
         </button>
 
         <!-- Loading state -->
         <div class="loading hidden" id="loading">
           <div class="spinner"></div>
-          <span>Generating...</span>
+          <span data-i18n="generating">Generating...</span>
         </div>
 
         <!-- Result section -->
         <div class="result-section hidden" id="resultSection">
-          <label class="label">Short URL</label>
+          <label class="label" data-i18n="short_url_label">Short URL</label>
           <div class="result-row">
             <input type="text" class="short-url-input" id="shortUrlInput" readonly>
-            <button class="btn-copy" id="btnCopy" title="Copy to clipboard">
+            <button class="btn-copy" id="btnCopy" data-i18n-title="btn_copy_title" title="Copy to clipboard">
               <svg class="icon-copy" id="iconCopy" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect x="9" y="9" width="13" height="13" rx="2" stroke="currentColor" stroke-width="2"/>
                 <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" stroke="currentColor" stroke-width="2"/>
@@ -166,7 +201,7 @@
               <svg class="icon-check hidden" id="iconCheck" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
-              <span id="copyText">Copy</span>
+              <span id="copyText" data-i18n="btn_copy">Copy</span>
             </button>
           </div>
         </div>
@@ -179,11 +214,12 @@
     </div>
 
     <!-- Footer -->
-    <div class="footer">
+    <div class="footer" data-i18n="footer_powered">
       Powered by <a href="https://mnurl.com" target="_blank">mnurl.com</a>
     </div>
   </div>
 
+  <script src="i18n.js"></script>
   <script src="popup.js"></script>
 </body>
 </html>

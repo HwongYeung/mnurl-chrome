@@ -11,6 +11,7 @@
 - **历史记录** — 浏览所有已创建的短网址，含点击次数和创建日期，支持分页
 - **用户信息** — 配置 API Key 后展示账户名称和套餐信息
 - **设置管理** — 随时配置和修改 API Key
+- **多语言支持** — 支持英文、简体中文、繁体中文，可在扩展内切换语言
 
 ## 安装
 
@@ -69,6 +70,11 @@ mnurl-chrome/
 ├── popup.html       # 弹窗界面
 ├── popup.css        # 样式
 ├── popup.js         # 核心逻辑
+├── i18n.js          # 国际化（运行时语言切换）
+├── _locales/        # Chrome 官方 manifest 本地化
+│   ├── en/messages.json
+│   ├── zh_CN/messages.json
+│   └── zh_TW/messages.json
 └── icons/           # 扩展图标 (16/32/48/128px)
 ```
 
