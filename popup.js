@@ -41,9 +41,11 @@ const $historyEmpty     = document.getElementById('historyEmpty');
 const $historyError     = document.getElementById('historyError');
 const $historyErrorMsg  = document.getElementById('historyErrorMsg');
 const $historyList      = document.getElementById('historyList');
+const $historySearchInput = document.getElementById('historySearchInput');
 
 // Main
-const $currentUrl     = document.getElementById('currentUrl');
+const $urlInput       = document.getElementById('urlInput');
+const $btnResetUrl    = document.getElementById('btnResetUrl');
 const $btnGenerate    = document.getElementById('btnGenerate');
 const $loading        = document.getElementById('loading');
 const $resultSection  = document.getElementById('resultSection');
@@ -79,19 +81,16 @@ async function init() {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     if (tab && tab.url) {
       currentTabUrl = tab.url;
-      $currentUrl.textContent = currentTabUrl;
-      $currentUrl.title = currentTabUrl;
-      // Remove data-i18n so applyTranslations won't overwrite URL
-      $currentUrl.removeAttribute('data-i18n');
+      $urlInput.value = currentTabUrl;
     } else {
       currentTabUrl = '';
-      $currentUrl.textContent = t('url_error');
-      $currentUrl.removeAttribute('data-i18n');
+      $urlInput.value = '';
+      $urlInput.placeholder = t('url_error');
       $btnGenerate.disabled = true;
     }
   } catch (err) {
-    $currentUrl.textContent = t('url_error');
-    $currentUrl.removeAttribute('data-i18n');
+    $urlInput.value = '';
+    $urlInput.placeholder = t('url_error');
     $btnGenerate.disabled = true;
   }
 
@@ -102,7 +101,8 @@ async function init() {
     currentTabUrl.startsWith('about:') ||
     currentTabUrl.startsWith('edge://')
   )) {
-    $currentUrl.textContent = t('url_internal');
+    $urlInput.value = '';
+    $urlInput.placeholder = t('url_internal');
     $btnGenerate.disabled = true;
   }
 
@@ -122,7 +122,44 @@ async function init() {
   $btnToggleKey.addEventListener('click', toggleKeyVisibility);
   $btnGenerate.addEventListener('click', handleGenerate);
   $btnCopy.addEventListener('click', handleCopy);
-  $btnRefresh.addEventListener('click', () => loadHistory(1));
+  $btnRefresh.addEventListener('click', () => loadHistory(1, true));
+
+  // History search input
+  let historySearchTimeout = null;
+  $historySearchInput.addEventListener('input', () => {
+    if (historySearchTimeout) clearTimeout(historySearchTimeout);
+    historySearchTimeout = setTimeout(() => {
+      filterHistory($historySearchInput.value.trim());
+    }, 200);
+  });
+
+  // URL input: show/hide reset button
+  $urlInput.addEventListener('input', () => {
+    const val = $urlInput.value.trim();
+    if (val !== currentTabUrl && currentTabUrl) {
+      $btnResetUrl.classList.remove('hidden');
+    } else {
+      $btnResetUrl.classList.add('hidden');
+    }
+  });
+
+  // Reset URL button
+  $btnResetUrl.addEventListener('click', resetUrl);
+
+  // Keyboard shortcut: Enter to generate
+  $urlInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !$btnGenerate.disabled) {
+      e.preventDefault();
+      handleGenerate();
+    }
+  });
+
+  // Auto-select URL text on focus (for quick overwrite)
+  $urlInput.addEventListener('focus', () => {
+    if ($urlInput.value && $urlInput.value === currentTabUrl) {
+      setTimeout(() => $urlInput.select(), 0);
+    }
+  });
 
   // Bind language selector events
   $langSelector.addEventListener('click', async (e) => {
@@ -156,16 +193,16 @@ function refreshDynamicTexts() {
     $headerSubtitle.textContent = t('subtitle');
   }
 
-  // Refresh current URL display (only if it's a status message, not an actual URL)
+  // Refresh URL input placeholder (only if it's a status message, not an actual URL)
   if (!currentTabUrl) {
-    $currentUrl.textContent = t('url_error');
+    $urlInput.placeholder = t('url_error');
   } else if (
     currentTabUrl.startsWith('chrome://') ||
     currentTabUrl.startsWith('chrome-extension://') ||
     currentTabUrl.startsWith('about:') ||
     currentTabUrl.startsWith('edge://')
   ) {
-    $currentUrl.textContent = t('url_internal');
+    $urlInput.placeholder = t('url_internal');
   }
 
   // Refresh generate button text if in "Regenerate" state
@@ -221,6 +258,8 @@ function switchView(view) {
   updateView();
 
   if (view === 'history' && apiToken) {
+    $historySearchInput.value = '';
+    historyFilteredLinks = null;
     loadHistory();
   }
   if (view === 'settings') {
@@ -299,9 +338,29 @@ function hideSettingsMsg() {
   $settingsMsg.textContent = '';
 }
 
+// ===== Network Status Check =====
+function checkNetwork() {
+  if (!navigator.onLine) {
+    showError(t('err_network'));
+    return false;
+  }
+  return true;
+}
+
 // ===== Generate Short URL =====
 async function handleGenerate() {
-  if (!currentTabUrl || !apiToken) return;
+  const urlToShorten = $urlInput.value.trim();
+
+  if (!urlToShorten || !apiToken) return;
+
+  // Check network connection
+  if (!checkNetwork()) return;
+
+  // Validate URL format
+  if (!validateUrl(urlToShorten)) {
+    showError(t('err_invalid_url'));
+    return;
+  }
 
   // Check links limit
   if (userLinksLimit !== -1 && userLinksUsed >= userLinksLimit) {
@@ -317,13 +376,13 @@ async function handleGenerate() {
 
   try {
     // Check if the URL already has a short link in history
-    const existing = await findExistingShortUrl(currentTabUrl);
+    const existing = await findExistingShortUrl(urlToShorten);
     if (existing) {
       showResult(existing);
       return;
     }
 
-    const shortUrl = await createShortUrl(currentTabUrl);
+    const shortUrl = await createShortUrl(urlToShorten);
     showResult(shortUrl);
   } catch (err) {
     showError(err.message || t('err_generate_fail'));
@@ -331,6 +390,37 @@ async function handleGenerate() {
   } finally {
     $loading.classList.add('hidden');
   }
+}
+
+// ===== URL Validation =====
+function validateUrl(url) {
+  // Must start with http:// or https://
+  if (!url.startsWith('http://') && !url.startsWith('https://')) {
+    return false;
+  }
+  // Block browser internal pages
+  if (
+    url.startsWith('chrome://') ||
+    url.startsWith('chrome-extension://') ||
+    url.startsWith('about:') ||
+    url.startsWith('edge://')
+  ) {
+    return false;
+  }
+  // Basic URL validity check
+  try {
+    new URL(url);
+    return true;
+  } catch (_) {
+    return false;
+  }
+}
+
+// ===== Reset URL to Current Tab =====
+function resetUrl() {
+  $urlInput.value = currentTabUrl;
+  $btnResetUrl.classList.add('hidden');
+  hideError();
 }
 
 // ===== Check History for Existing Short URL =====
@@ -372,6 +462,7 @@ async function createShortUrl(url) {
 async function apiCreateLink(url) {
   const formData = new FormData();
   formData.append('location_url', url);
+  formData.append('domain_id', '2');
 
   const response = await fetch(API_BASE, {
     method: 'POST',
@@ -412,6 +503,20 @@ async function apiGetLinkDetail(linkId) {
 
   const data = await response.json();
   return data.data || data;
+}
+
+// DELETE /api/links/{link_id} — delete a link
+async function apiDeleteLink(linkId) {
+  const response = await fetch(`${API_BASE}/${linkId}`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${apiToken}`,
+    },
+  });
+
+  if (!response.ok) {
+    handleApiError(response.status, await safeJson(response));
+  }
 }
 
 // GET /api/links/{link_id} — query link detail, return the url slug
@@ -571,8 +676,31 @@ let historyPage = 1;
 let historyTotalPages = 1;
 let allFilteredLinks = []; // All type==='link' items across all API pages
 const HISTORY_PER_PAGE = 25;
+const HISTORY_CACHE_KEY = 'mnurl_history_cache';
+const HISTORY_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
-async function loadHistory(page = 1) {
+// Load history cache from storage
+async function loadHistoryCache() {
+  return new Promise((resolve) => {
+    chrome.storage.local.get(HISTORY_CACHE_KEY, (result) => {
+      const cache = result[HISTORY_CACHE_KEY];
+      if (cache && cache.timestamp && (Date.now() - cache.timestamp < HISTORY_CACHE_TTL)) {
+        resolve(cache.data || []);
+      } else {
+        resolve(null);
+      }
+    });
+  });
+}
+
+// Save history cache to storage
+function saveHistoryCache(data) {
+  chrome.storage.local.set({
+    [HISTORY_CACHE_KEY]: { data, timestamp: Date.now() }
+  });
+}
+
+async function loadHistory(page = 1, forceRefresh = false) {
   // UI: loading
   $historyList.innerHTML = '';
   $historyEmpty.classList.add('hidden');
@@ -582,6 +710,21 @@ async function loadHistory(page = 1) {
   hidePagination();
 
   try {
+    // Try loading from cache first (unless force refresh)
+    if (!forceRefresh) {
+      const cached = await loadHistoryCache();
+      if (cached) {
+        allFilteredLinks = cached;
+        renderHistoryPage(page);
+        return;
+      }
+    }
+
+    // Check network before fetching
+    if (!navigator.onLine) {
+      throw new Error(t('err_network'));
+    }
+
     // Fetch all pages from API and filter client-side
     allFilteredLinks = [];
     let apiPage = 1;
@@ -594,31 +737,64 @@ async function loadHistory(page = 1) {
       apiPage++;
     } while (apiPage <= apiTotalPages);
 
-    // Client-side pagination
-    historyTotalPages = Math.ceil(allFilteredLinks.length / HISTORY_PER_PAGE) || 1;
-    historyPage = Math.min(page, historyTotalPages);
+    // Save to cache
+    saveHistoryCache(allFilteredLinks);
 
-    const start = (historyPage - 1) * HISTORY_PER_PAGE;
-    const pageLinks = allFilteredLinks.slice(start, start + HISTORY_PER_PAGE);
-
-    $historyLoading.classList.add('hidden');
-    $btnRefresh.classList.remove('spinning');
-
-    if (pageLinks.length === 0) {
-      $historyEmpty.classList.remove('hidden');
-      return;
-    }
-
-    renderHistoryList(pageLinks);
-    if (historyTotalPages > 1) {
-      renderPagination();
-    }
+    renderHistoryPage(page);
   } catch (err) {
     $historyLoading.classList.add('hidden');
     $btnRefresh.classList.remove('spinning');
     $historyErrorMsg.textContent = err.message || t('err_history');
     $historyError.classList.remove('hidden');
   }
+}
+
+function renderHistoryPage(page) {
+  // Get the current data set (filtered or all)
+  const dataSet = historyFilteredLinks || allFilteredLinks;
+
+  // Client-side pagination
+  historyTotalPages = Math.ceil(dataSet.length / HISTORY_PER_PAGE) || 1;
+  historyPage = Math.min(page, historyTotalPages);
+
+  const start = (historyPage - 1) * HISTORY_PER_PAGE;
+  const pageLinks = dataSet.slice(start, start + HISTORY_PER_PAGE);
+
+  $historyLoading.classList.add('hidden');
+  $btnRefresh.classList.remove('spinning');
+
+  if (pageLinks.length === 0) {
+    $historyEmpty.classList.remove('hidden');
+    return;
+  }
+
+  renderHistoryList(pageLinks);
+  if (historyTotalPages > 1) {
+    renderPagination();
+  }
+}
+
+// ===== History Search/Filter =====
+let historyFilteredLinks = null; // null means no filter active
+
+function filterHistory(query) {
+  if (!query) {
+    // Reset filter
+    historyFilteredLinks = null;
+  } else {
+    const lowerQuery = query.toLowerCase();
+    historyFilteredLinks = allFilteredLinks.filter((link) => {
+      const shortUrl = `https://mnurl.com/${link.url}`.toLowerCase();
+      const locationUrl = (link.location_url || '').toLowerCase();
+      return shortUrl.includes(lowerQuery) || locationUrl.includes(lowerQuery);
+    });
+  }
+
+  // Re-render from page 1
+  $historyList.innerHTML = '';
+  $historyEmpty.classList.add('hidden');
+  hidePagination();
+  renderHistoryPage(1);
 }
 
 // GET /api/links/ — fetch paginated link list
@@ -645,6 +821,7 @@ function renderHistoryList(links) {
     const shortUrl = `https://mnurl.com/${link.url}`;
     const item = document.createElement('div');
     item.className = 'history-item';
+    item.dataset.linkId = link.id;
 
     // Format date with current language locale
     let dateStr = '';
@@ -656,6 +833,7 @@ function renderHistoryList(links) {
     const clicksText = t('clicks', { count: link.clicks ?? 0 });
     const copyTitle = t('btn_copy_title');
     const openTitle = t('btn_open_title');
+    const deleteTitle = t('btn_delete_title');
 
     item.innerHTML = `
       <div class="history-item-top">
@@ -672,6 +850,14 @@ function renderHistoryList(links) {
               <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               <polyline points="15,3 21,3 21,9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               <line x1="10" y1="14" x2="21" y2="3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <button class="btn-history-delete" data-link-id="${link.id}" title="${escapeHtml(deleteTitle)}">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <polyline points="3,6 5,6 21,6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <line x1="10" y1="11" x2="10" y2="17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <line x1="14" y1="11" x2="14" y2="17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
             </svg>
           </button>
         </div>
@@ -705,6 +891,68 @@ function renderHistoryList(links) {
       chrome.tabs.create({ url: btn.dataset.url });
     });
   });
+
+  // Bind delete events
+  $historyList.querySelectorAll('.btn-history-delete').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const linkId = btn.dataset.linkId;
+      handleDeleteLink(linkId, btn);
+    });
+  });
+}
+
+// ===== Delete Link =====
+async function handleDeleteLink(linkId, btnEl) {
+  if (!confirm(t('confirm_delete'))) return;
+
+  // Disable button and show loading state
+  btnEl.disabled = true;
+  btnEl.classList.add('deleting');
+
+  try {
+    await apiDeleteLink(linkId);
+
+    // Remove from local data
+    allFilteredLinks = allFilteredLinks.filter((link) => String(link.id) !== String(linkId));
+    if (historyFilteredLinks) {
+      historyFilteredLinks = historyFilteredLinks.filter((link) => String(link.id) !== String(linkId));
+    }
+
+    // Update cache
+    saveHistoryCache(allFilteredLinks);
+
+    // Remove the item from DOM with animation
+    const item = btnEl.closest('.history-item');
+    if (item) {
+      item.classList.add('removing');
+      setTimeout(() => {
+        item.remove();
+        // Re-render if the page is now empty but there are more items
+        const dataSet = historyFilteredLinks || allFilteredLinks;
+        if ($historyList.children.length === 0 && dataSet.length > 0) {
+          renderHistoryPage(historyPage);
+        } else if (dataSet.length === 0) {
+          hidePagination();
+          $historyEmpty.classList.remove('hidden');
+        } else {
+          // Update pagination if needed
+          const newTotalPages = Math.ceil(dataSet.length / HISTORY_PER_PAGE) || 1;
+          if (newTotalPages !== historyTotalPages) {
+            historyTotalPages = newTotalPages;
+            if (historyPage > historyTotalPages) historyPage = historyTotalPages;
+            hidePagination();
+            if (historyTotalPages > 1) renderPagination();
+          }
+        }
+      }, 300);
+    }
+
+    showToast(t('toast_deleted'));
+  } catch (err) {
+    btnEl.disabled = false;
+    btnEl.classList.remove('deleting');
+    showToast(err.message || t('err_delete_fail'));
+  }
 }
 
 // ===== Pagination =====
@@ -723,7 +971,11 @@ function renderPagination() {
   btnPrev.className = 'btn-page';
   btnPrev.textContent = t('prev');
   btnPrev.disabled = historyPage <= 1;
-  btnPrev.addEventListener('click', () => loadHistory(historyPage - 1));
+  btnPrev.addEventListener('click', () => {
+    $historyList.innerHTML = '';
+    hidePagination();
+    renderHistoryPage(historyPage - 1);
+  });
 
   const pageInfo = document.createElement('span');
   pageInfo.className = 'page-info';
@@ -733,7 +985,11 @@ function renderPagination() {
   btnNext.className = 'btn-page';
   btnNext.textContent = t('next');
   btnNext.disabled = historyPage >= historyTotalPages;
-  btnNext.addEventListener('click', () => loadHistory(historyPage + 1));
+  btnNext.addEventListener('click', () => {
+    $historyList.innerHTML = '';
+    hidePagination();
+    renderHistoryPage(historyPage + 1);
+  });
 
   pager.appendChild(btnPrev);
   pager.appendChild(pageInfo);
@@ -770,7 +1026,7 @@ async function copyToClipboard(text, btnEl) {
   setTimeout(() => {
     btnEl.classList.remove('copied');
     btnEl.innerHTML = originalHTML;
-  }, 1500);
+  }, 1000);
 }
 
 function escapeHtml(str) {
@@ -806,16 +1062,38 @@ function showCopiedState() {
     $iconCopy.classList.remove('hidden');
     $iconCheck.classList.add('hidden');
     $copyText.textContent = t('btn_copy');
-  }, 2000);
+  }, 1000);
 }
 
 // ===== UI Helpers =====
+const $toast = document.getElementById('toast');
+const $toastMsg = document.getElementById('toastMsg');
+let toastTimeout = null;
+
+function showToast(msg) {
+  $toastMsg.textContent = msg;
+  $toast.classList.add('visible');
+  // Trigger reflow for animation
+  void $toast.offsetWidth;
+  $toast.classList.add('show');
+
+  if (toastTimeout) clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => {
+    $toast.classList.remove('show');
+    setTimeout(() => {
+      $toast.classList.remove('visible');
+    }, 300);
+  }, 2000);
+}
+
 function showResult(shortUrl) {
   $shortUrlInput.value = shortUrl;
   $resultSection.classList.remove('hidden');
   $btnGenerate.classList.remove('hidden');
   $btnGenerate.querySelector('span').textContent = t('btn_regenerate');
   setTimeout(() => $shortUrlInput.select(), 50);
+  // Show success toast
+  showToast(t('toast_generated'));
 }
 
 function hideResult() {

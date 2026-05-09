@@ -3,6 +3,6 @@
     "message": "mnURL - 短網址產生器"
   },
   "extDescription": {
-    "message": "透過 mnurl.com 一鍵產生目前頁面的短網址，支援中英雙語。"
+    "message": "透過 mnurl.com 產生短網址，支援縮短目前頁面或手動輸入網址。"
   }
 }

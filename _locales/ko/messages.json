@@ -1,0 +1,8 @@
+{
+  "extName": {
+    "message": "mnURL - 단축 URL 생성기"
+  },
+  "extDescription": {
+    "message": "mnurl.com을 통해 모든 페이지의 단축 URL을 생성합니다. 현재 페이지 단축 및 사용자 지정 URL 입력을 지원합니다."
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "extName": {
+    "message": "mnURL - Kurz-URL-Generator"
+  },
+  "extDescription": {
+    "message": "Erstellen Sie Kurz-URLs für jede Seite über mnurl.com. Unterstützt das Kürzen der aktuellen Seite und benutzerdefinierte URL-Eingabe."
+  }
+}

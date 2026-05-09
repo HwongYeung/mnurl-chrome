@@ -1,0 +1,8 @@
+{
+  "extName": {
+    "message": "mnURL - 短縮URLジェネレーター"
+  },
+  "extDescription": {
+    "message": "mnurl.comで任意のページの短縮URLを生成。現在のページの短縮とカスタムURL入力に対応。"
+  }
+}
